@@ -63,6 +63,99 @@ CREATE TABLE `discount_time`.`item` (
     REFERENCES `discount_time`.`collection` (`id`)
     ON DELETE CASCADE
     ON UPDATE CASCADE);
+    
+    CREATE TABLE `discount_time`.`size` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `uk` DOUBLE NOT NULL,
+  `eur` DOUBLE NOT NULL,
+  `international` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`id`));
+  
+  CREATE TABLE `discount_time`.`item_size` (
+  `item_article` INT NOT NULL,
+  `size_id` INT NOT NULL,
+  `quantity` INT NOT NULL DEFAULT 0,
+  PRIMARY KEY (`item_article`, `size_id`),
+  INDEX `fk_size_id_idx` (`size_id` ASC) VISIBLE,
+  CONSTRAINT `fk_item_article`
+    FOREIGN KEY (`item_article`)
+    REFERENCES `discount_time`.`item` (`article`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_size_id`
+    FOREIGN KEY (`size_id`)
+    REFERENCES `discount_time`.`size` (`id`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE);
+
+    
+--     USE `discount_time`;
+-- CREATE  OR REPLACE VIEW `item_info_view` AS
+-- select item.article, item.`name`, brand.`name` 'brand', brand.discount 'discount_on_brand', 
+-- category.`name` 'category', category.discount 'discount_on_category',
+--  `type`.`name` 'type', `type`.discount 'discount_on_type',
+--  collection.`name` 'collection', collection.discount 'discount_on_collection',
+--  item.price, item.discount 'item_discount' from item
+--  inner join brand on item.brand_id = brand.id
+--  inner join category on item.category_id = category.id
+--  inner join `type` on item.type_id = `type`.id
+--  inner join collection on item.collection_id = collection.id;
+ 
+CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`localhost` 
+    SQL SECURITY DEFINER
+VIEW `discount_time`.`item_info_view` AS
+    SELECT 
+        `discount_time`.`item`.`article` AS `article`,
+        `discount_time`.`item`.`name` AS `name`,
+        `discount_time`.`brand`.`name` AS `brand`,
+        `discount_time`.`brand`.`discount` AS `discount_on_brand`,
+        `discount_time`.`category`.`name` AS `category`,
+        `discount_time`.`category`.`discount` AS `discount_on_category`,
+        `discount_time`.`type`.`name` AS `type`,
+        `discount_time`.`type`.`discount` AS `discount_on_type`,
+        `discount_time`.`collection`.`name` AS `collection`,
+        `discount_time`.`collection`.`discount` AS `discount_on_collection`,
+        `discount_time`.`item`.`price` AS `price`,
+        `discount_time`.`item`.`discount` AS `item_discount`
+    FROM
+        ((((`discount_time`.`item`
+        JOIN `discount_time`.`brand` ON ((`discount_time`.`item`.`brand_id` = `discount_time`.`brand`.`id`)))
+        JOIN `discount_time`.`category` ON ((`discount_time`.`item`.`category_id` = `discount_time`.`category`.`id`)))
+        JOIN `discount_time`.`type` ON ((`discount_time`.`item`.`type_id` = `discount_time`.`type`.`id`)))
+        JOIN `discount_time`.`collection` ON ((`discount_time`.`item`.`collection_id` = `discount_time`.`collection`.`id`)));
+        
+        CREATE 
+    ALGORITHM = UNDEFINED 
+    DEFINER = `root`@`localhost` 
+    SQL SECURITY DEFINER
+VIEW `discount_time`.`full_item_info_view` AS
+    SELECT 
+        `discount_time`.`item`.`article` AS `article`,
+        `discount_time`.`item`.`name` AS `name`,
+        `discount_time`.`brand`.`name` AS `brand`,
+        `discount_time`.`brand`.`discount` AS `discount_on_brand`,
+        `discount_time`.`category`.`name` AS `category`,
+        `discount_time`.`category`.`discount` AS `discount_on_category`,
+        `discount_time`.`type`.`name` AS `type`,
+        `discount_time`.`type`.`discount` AS `discount_on_type`,
+        `discount_time`.`collection`.`name` AS `collection`,
+        `discount_time`.`collection`.`discount` AS `discount_on_collection`,
+        `discount_time`.`item`.`price` AS `price`,
+        `discount_time`.`item`.`discount` AS `item_discount`,
+        `discount_time`.`size`.`uk` AS `size_uk`,
+        `discount_time`.`size`.`eur` AS `size_eur`,
+        `discount_time`.`item_size`.`quantity` AS `quantity`
+    FROM
+        ((((((`discount_time`.`item_size`
+        JOIN `discount_time`.`item` ON ((`discount_time`.`item_size`.`item_article` = `discount_time`.`item`.`article`)))
+        JOIN `discount_time`.`brand` ON ((`discount_time`.`item`.`brand_id` = `discount_time`.`brand`.`id`)))
+        JOIN `discount_time`.`category` ON ((`discount_time`.`item`.`category_id` = `discount_time`.`category`.`id`)))
+        JOIN `discount_time`.`type` ON ((`discount_time`.`item`.`type_id` = `discount_time`.`type`.`id`)))
+        JOIN `discount_time`.`collection` ON ((`discount_time`.`item`.`collection_id` = `discount_time`.`collection`.`id`)))
+        JOIN `discount_time`.`size` ON ((`discount_time`.`item_size`.`size_id` = `discount_time`.`size`.`id`)));
+
 
 -- insert values into "brand" table
 INSERT INTO `discount_time`.`brand` (`name`, `discount`) VALUES ('Nike', '0');
@@ -163,6 +256,38 @@ INSERT INTO `discount_time`.`collection` (`name`, `discount`) VALUES ('spring 20
 INSERT INTO `discount_time`.`collection` (`name`, `discount`) VALUES ('summer 2021', '0');
 INSERT INTO `discount_time`.`collection` (`name`, `discount`) VALUES ('autumn 2021', '0');
 
+-- insert values into "size" table
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('14', '40', 'XS');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('14.5', '42', 'XS');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('15', '44', 'S');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('15.5', '46', 'S');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('16', '48', 'M');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('16.5', '50', 'M');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('17', '52', 'L');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('17.5', '54', 'L');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('18', '56', 'XL');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('18', '56', 'XL');
+INSERT INTO `discount_time`.`size` (`id`, `uk`, `eur`, `international`) VALUES ('101', '3.5', '36', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('4', '37', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('4.5', '37.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('5', '38', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('5.5', '39', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('6', '39.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('6.5', '40', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('7', '41', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('7.5', '41.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('8', '42', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('8.5', '42.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('9', '43', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('9.5', '44', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('10', '44.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('10.5', '45', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('11', '46', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('11.5', '46.5', '-');
+INSERT INTO `discount_time`.`size` (`uk`, `eur`, `international`) VALUES ('12', '47', '-');
+INSERT INTO `discount_time`.`size` (`id`, `uk`, `eur`, `international`) VALUES ('200', '0', '0', 'unsize');
+
+
 -- insert values into "item" table
 INSERT INTO `discount_time`.`item` (`article`, `name`, `brand_id`, `category_id`, `type_id`, `collection_id`, `price`, `discount`) VALUES ('10000001', 'Nike Just do it', '1', '1', '2', '4', '84.99', '0');
 INSERT INTO `discount_time`.`item` (`name`, `brand_id`, `category_id`, `type_id`, `collection_id`, `price`, `discount`) VALUES ('Thunder', '21', '7', '27', '9', '120', '0');
@@ -170,6 +295,32 @@ INSERT INTO `discount_time`.`item` (`name`, `brand_id`, `category_id`, `type_id`
 INSERT INTO `discount_time`.`item` (`name`, `brand_id`, `category_id`, `type_id`, `collection_id`, `price`, `discount`) VALUES ('Griffed chronograph gold-tone stainless steel watch', '26', '4', '31', '14', '999', '0');
 INSERT INTO `discount_time`.`item` (`name`, `brand_id`, `category_id`, `type_id`, `collection_id`, `price`, `discount`) VALUES ('Oyster Perpetual Datejust 41', '10', '4', '31', '12', '17000', '0');
 INSERT INTO `discount_time`.`item` (`name`, `brand_id`, `category_id`, `type_id`, `collection_id`, `price`, `discount`) VALUES ('Oyster Perpetual Submariner Date', '10', '5', '31', '12', '21599', '0');
+
+
+-- insert values into "item_size" table
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '1', '40');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '2', '11');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '3', '4');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '4', '5');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '5', '48');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '6', '45');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '7', '3');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '8', '65');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '9', '45');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000001', '10', '7');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000003', '200', '31');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000004', '200', '5');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000005', '200', '11');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000006', '200', '3');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '108', '4');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '109', '0');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '110', '55');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '111', '77');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '112', '88');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '113', '2');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '114', '15');
+INSERT INTO `discount_time`.`item_size` (`item_article`, `size_id`, `quantity`) VALUES ('10000007', '115', '3');
+
 
 
 
